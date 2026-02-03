@@ -2,6 +2,7 @@ using BankRUs.Application.Authentication;
 using BankRUs.Application.Authentication.AuthenticateUser;
 using BankRUs.Application.Identity;
 using BankRUs.Application.Repositories;
+using BankRUs.Application.UseCases.AddBalance;
 using BankRUs.Application.UseCases.OpenAccount;
 using BankRUs.Application.UseCases.OpenBankAccount;
 using BankRUs.Infrastructure.Configuration;
@@ -47,6 +48,8 @@ builder.Services.AddScoped<OpenAccountHandler>();
 builder.Services.AddScoped<OpenBankAccountHandler>();
 builder.Services.AddScoped<AuthenticateUserHandler>();
 
+builder.Services.AddScoped<DepositHandler>();
+
 // Services
 builder.Services.AddScoped<IIdentityService, IdentityService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
@@ -65,6 +68,7 @@ else
 
 // Repositories
 builder.Services.AddScoped<IBankAccountRepository, BankAccountRepository>();
+builder.Services.AddScoped<IBankAccountTransactionRepository, BankAccountTransactionRepository>();
 
 // 3 typer av livslängder på objekt
 // - singleton = ett och samma objekt delas mellan alla andra under hela applikations livslängd

@@ -28,6 +28,16 @@ public class BankAccount
 
     public void Deposit(decimal amount, string reference) { }
     public void Withdraw(decimal amount, string reference) { }
+
+    public bool SetBalance(decimal amount) 
+    {
+        if (amount <= 0)
+        {
+            return false;
+        }
+        Balance = amount;
+        return true;
+    }
 }
 
 // Konstruktor

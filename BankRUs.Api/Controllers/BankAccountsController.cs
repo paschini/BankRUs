@@ -1,19 +1,26 @@
 ﻿using BankRUs.Api.Dtos.BankAccounts;
+using BankRUs.Application.UseCases.AddBalance;
 using BankRUs.Application.UseCases.OpenBankAccount;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BankRUs.Api.Controllers;
 
 [Route("api/bank-accounts")]
+[Authorize(Roles = "Customer")]
 [ApiController]
 public class BankAccountsController : ControllerBase
 {
     private readonly OpenBankAccountHandler _openBankAccountHandler;
+    private readonly DepositHandler _depositToAccountHandler;
 
-    public BankAccountsController(OpenBankAccountHandler openBankAccountHandler)
+    public BankAccountsController(
+        OpenBankAccountHandler openBankAccountHandler, 
+        DepositHandler depositToAccountHandler)
     {
         _openBankAccountHandler = openBankAccountHandler;
+        _depositToAccountHandler = depositToAccountHandler;
     }
 
     // POST /api/bank-accounts
@@ -38,5 +45,41 @@ public class BankAccountsController : ControllerBase
             UserId: Guid.NewGuid());
 
         return Created(string.Empty, response);
+    }
+
+    // POST /api/bank-accounts/{bankAccountId}/deposits
+    [HttpPost]
+    [Route("{bankAccountId}/deposit")]
+    public async Task<IActionResult> DepositToBankAccount(Guid bankAccountId, DepositRequestDto request)
+    {
+        try
+        {
+            var depositResult = await _depositToAccountHandler.HandleAsync(
+            new DepositCommand
+            {
+                AccountNumber = bankAccountId,
+                Amount = request.Amount,
+                Reference = request.Reference,
+                Currency = "SEK"
+            });
+
+            var response = new DepositResponseDto
+            {
+                TransactionId = depositResult.TransactionId,
+                UserId = depositResult.UserId,
+                Type = depositResult.Type,
+                Amount = depositResult.Amount,
+                Currency = depositResult.Currency,
+                Reference = depositResult.Reference,
+                CreatedAt = depositResult.CreatedAt,
+                BalanceAfter = depositResult.BalanceAfter
+            };
+
+            return Created(string.Empty, response);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
     }
 }
