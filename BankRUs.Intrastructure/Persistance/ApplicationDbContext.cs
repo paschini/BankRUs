@@ -11,6 +11,13 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     {
         base.OnModelCreating(builder);
 
+        builder.Entity<ApplicationUser>(builder =>
+        {
+            builder
+                .HasIndex(u => u.SocialSecurityNumber)
+                .IsUnique();
+        });
+
         builder.Entity<BankAccount>(builder =>
         {
             builder.Property(x => x.Balance)
@@ -25,8 +32,21 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
             HasOne<ApplicationUser>().
             WithMany().
             HasForeignKey(b => b.UserId);
+
+       builder.Entity<BankAccountTransaction>(builder =>
+       {
+           
+           builder.Property(x => x.Amount)
+             .HasPrecision(18, 2);
+
+           builder
+           .HasOne<BankAccount>()
+           .WithMany()
+           .HasForeignKey(t => t.BankAccountId);
+       });
     }
 
     public DbSet<BankAccount> BankAccounts => Set<BankAccount>();
+    public DbSet<BankAccountTransaction> BankAccountTransactions => Set<BankAccountTransaction>();
 }
 
