@@ -1,10 +1,11 @@
 ﻿using BankRUs.Api.Dtos.BankAccounts;
 using BankRUs.Application.UseCases.Deposit;
-using BankRUs.Application.UseCases.Withdrawal;
 using BankRUs.Application.UseCases.OpenBankAccount;
+using BankRUs.Application.UseCases.Withdrawal;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BankRUs.Api.Controllers;
 
@@ -59,6 +60,7 @@ public class BankAccountsController : ControllerBase
     {
         try
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var depositResult = await _depositToAccountHandler.HandleAsync(
             new DepositCommand
             {
@@ -71,6 +73,8 @@ public class BankAccountsController : ControllerBase
             var response = new DepositResponseDto
             {
                 TransactionId = depositResult.TransactionId,
+                AccountId = bankAccountId,
+                UserId = Guid.Parse(userId),
                 Type = depositResult.Type,
                 Amount = depositResult.Amount,
                 Currency = depositResult.Currency,
@@ -94,6 +98,7 @@ public class BankAccountsController : ControllerBase
     {
         try
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var withdrawalResult = await _withdrawalFromAccountHandler.HandleAsync(
             new WithdrawalCommand
             {
@@ -106,6 +111,8 @@ public class BankAccountsController : ControllerBase
             var response = new WithdrawalResponseDto
             {
                 TransactionId = withdrawalResult.TransactionId,
+                AccountId = bankAccountId,
+                UserId = Guid.Parse(userId),
                 Type = withdrawalResult.Type,
                 Amount = withdrawalResult.Amount,
                 Currency = withdrawalResult.Currency,

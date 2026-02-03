@@ -7,7 +7,6 @@ namespace BankRUs.Application.UseCases.Deposit
     public record DepositResult
     {
         public Guid TransactionId { get; set; }
-        public Guid UserId { get; set; }
         public string Type { get; set; }
         public decimal Amount { get; set; }
         public string Currency { get; set; } = "SEK";

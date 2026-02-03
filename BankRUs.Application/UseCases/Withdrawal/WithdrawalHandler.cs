@@ -1,14 +1,15 @@
-﻿using System;
+﻿using BankRUs.Application.Repositories;
+using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Text;
-using BankRUs.Application.Repositories;
 
 namespace BankRUs.Application.UseCases.Withdrawal
 {
     public class WithdrawalHandler
     {
         private readonly IBankAccountRepository _bankAccountRepository;
-        private readonly IBankAccountTransactionRepository _bankAccountTransactionRepository;
+        private readonly IBankAccountTransactionRepository _bankAccountTransactionRepository
 
         public WithdrawalHandler(
             IBankAccountRepository bankAccountRepository,
@@ -21,6 +22,7 @@ namespace BankRUs.Application.UseCases.Withdrawal
         public async Task<WithdrawalResult> HandleAsync(WithdrawalCommand command)
         {
             var bankAccount = await _bankAccountRepository.GetByAccountNumber(command.AccountNumber);
+
             if (bankAccount == null || command.Amount < 0 || bankAccount.Balance < command.Amount)
             {
                 throw new Exception("Bank account not found, bad amount, or insufficient funds.");
