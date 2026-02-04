@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace BankRUs.Application.UseCases.AddBalance
+namespace BankRUs.Application.UseCases.Deposit
 {
-    public class DepositResult
+    public record DepositResult
     {
         public Guid TransactionId { get; set; }
-        public Guid UserId { get; set; }
         public string Type { get; set; }
         public decimal Amount { get; set; }
         public string Currency { get; set; } = "SEK";

@@ -2,7 +2,8 @@ using BankRUs.Application.Authentication;
 using BankRUs.Application.Authentication.AuthenticateUser;
 using BankRUs.Application.Identity;
 using BankRUs.Application.Repositories;
-using BankRUs.Application.UseCases.AddBalance;
+using BankRUs.Application.UseCases.Deposit;
+using BankRUs.Application.UseCases.Withdrawal;
 using BankRUs.Application.UseCases.OpenAccount;
 using BankRUs.Application.UseCases.OpenBankAccount;
 using BankRUs.Infrastructure.Configuration;
@@ -49,6 +50,7 @@ builder.Services.AddScoped<OpenBankAccountHandler>();
 builder.Services.AddScoped<AuthenticateUserHandler>();
 
 builder.Services.AddScoped<DepositHandler>();
+builder.Services.AddScoped<WithdrawalHandler>();
 
 // Services
 builder.Services.AddScoped<IIdentityService, IdentityService>();

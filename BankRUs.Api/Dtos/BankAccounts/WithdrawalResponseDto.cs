@@ -1,6 +1,6 @@
 ﻿namespace BankRUs.Api.Dtos.BankAccounts
 {
-    public record DepositResponseDto
+    public record WithdrawalResponseDto
     {
         public Guid TransactionId { get; set; }
         public Guid AccountId { get; set; }
