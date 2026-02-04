@@ -1,6 +1,9 @@
 ﻿using BankRUs.Api.Dtos.BankAccounts;
+using BankRUs.Api.Dtos.Transactions;
 using BankRUs.Application.UseCases.Deposit;
 using BankRUs.Application.UseCases.OpenBankAccount;
+using BankRUs.Application.UseCases.Transactions;
+using BankRUs.Application.UseCases.Transactions.Exceptions;
 using BankRUs.Application.UseCases.Withdrawal;
 using BankRUs.Application.UseCases.Withdrawal.Exceptions;
 using Microsoft.AspNetCore.Authorization;
@@ -18,16 +21,19 @@ public class BankAccountsController : ControllerBase
     private readonly OpenBankAccountHandler _openBankAccountHandler;
     private readonly DepositHandler _depositToAccountHandler;
     private readonly WithdrawalHandler _withdrawalFromAccountHandler;
+    private readonly TransactionsQueryHandler _transactionsQueryHandler;
 
     public BankAccountsController(
         OpenBankAccountHandler openBankAccountHandler, 
         DepositHandler depositToAccountHandler,
-        WithdrawalHandler withdrawalFromAccountHandler)
+        WithdrawalHandler withdrawalFromAccountHandler,
+        TransactionsQueryHandler transactionQueryHandler)
     {
         _openBankAccountHandler = openBankAccountHandler;
         _depositToAccountHandler = depositToAccountHandler;
         _withdrawalFromAccountHandler = withdrawalFromAccountHandler;
         _withdrawalFromAccountHandler = withdrawalFromAccountHandler;
+        _transactionsQueryHandler = transactionQueryHandler;
     }
 
     // POST /api/bank-accounts
@@ -107,7 +113,7 @@ public class BankAccountsController : ControllerBase
                 Amount = request.Amount,
                 Reference = request.Reference,
                 Currency = "SEK",
-                UserId = Guid.Parse(userId)
+                UserId = Guid.Parse(userId ?? string.Empty)
             });
 
             var response = new WithdrawalResponseDto
@@ -138,23 +144,54 @@ public class BankAccountsController : ControllerBase
     // GET /api/bank-accounts/{bankAccountId}/transactions
     [HttpGet]
     [Route("{bankAccountId}/transactions")]
-    public async Task<IActionResult> GetTransactions(Guid bankAccountId, [FromQuery] TransactionQueryParams query)
+    public async Task<IActionResult> GetTransactions(Guid bankAccountId, [FromQuery] TransactionQueryParamsDto query)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        try
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        var transactions = await _transactionQueryHandler.HandleAsync(
-            new GetTransactionsQuery
+            var transactions = await _transactionsQueryHandler.HandleAsync(
+                new TransactionsQuery
+                {
+                    UserId = Guid.Parse(userId),
+                    BankAccountId = bankAccountId,
+                    Page = query.Page,
+                    PageSize = query.PageSize,
+                    From = query.From,
+                    To = query.To,
+                    Type = query.Type,
+                    Sort = query.Sort
+                });
+
+            var response = new TransactionsQueryResponseDto
             {
-                BankAccountId = bankAccountId,
-                UserId = userId,
-                Page = query.Page,
-                PageSize = query.PageSize,
-                From = query.From,
-                To = query.To,
-                Type = query.Type,
-                Sort = query.Sort
-            });
-
-        return Ok(transactions);
+                AccountId = transactions.AccountId,
+                Balance = transactions.Balance,
+                Paging = new PagingInfoDto
+                {
+                    Page = transactions.Paging.Page,
+                    PageSize = transactions.Paging.PageSize,
+                    TotalCount = transactions.Paging.TotalCount
+                },
+                Items = transactions.Items.Select(tr => new TransactionDto
+                {
+                    TransactionId = tr.Id,
+                    TransactionType = tr.TransactionType,
+                    TransactionAmount = tr.Amount,
+                    Currency = tr.TransactionCurrency,
+                    TransactionReference = tr.Reference,
+                    TransactionCreatedAt = tr.TransactionDate,
+                    BalanceAfterTransaction = tr.BalanceAfterTransaction
+                }).ToList()
+            };
+            return Ok(response);
+        } catch (NotOwnedException ex)
+        {
+            return Forbid();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { ex.Message });
+        }
     }
 }
