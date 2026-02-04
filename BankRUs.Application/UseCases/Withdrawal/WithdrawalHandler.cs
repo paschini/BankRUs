@@ -1,4 +1,5 @@
 ﻿using BankRUs.Application.Repositories;
+using BankRUs.Application.UseCases.Withdrawal.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -23,9 +24,19 @@ namespace BankRUs.Application.UseCases.Withdrawal
         {
             var bankAccount = await _bankAccountRepository.GetByAccountNumber(command.AccountNumber);
 
-            if (bankAccount == null || command.Amount < 0 || bankAccount.Balance < command.Amount)
+            if (bankAccount == null || command.Amount < 0)
             {
-                throw new Exception("Bank account not found, bad amount, or insufficient funds.");
+                throw new Exception("Bank account not found or bad amount.");
+            }
+
+            if (bankAccount.Balance < command.Amount)
+            {
+                throw new InsufficientFundsException("Insufficient funds for withdrawal.");
+            }
+
+            if (bankAccount.UserId != command.UserId.ToString())
+            {
+                throw new Exception("Unauthorized withdrawal attempt.");
             }
 
             bankAccount.SetBalance(bankAccount.Balance - command.Amount);
@@ -48,7 +59,6 @@ namespace BankRUs.Application.UseCases.Withdrawal
             return new WithdrawalResult
             {
                 TransactionId = transaction.Id,
-                UserId = Guid.Parse(bankAccount.UserId),
                 Type = transaction.TransactionType,
                 Amount = -transaction.Amount,
                 Currency = transaction.TransactionCurrency ?? "SEK",

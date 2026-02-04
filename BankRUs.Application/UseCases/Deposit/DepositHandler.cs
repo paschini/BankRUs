@@ -46,7 +46,6 @@ namespace BankRUs.Application.UseCases.Deposit
             return new DepositResult
             {
                 TransactionId = transaction.Id,
-                UserId = Guid.Parse(bankAccount.UserId),
                 Type = transaction.TransactionType,
                 Amount = transaction.Amount,
                 Currency = transaction.TransactionCurrency ?? "SEK",

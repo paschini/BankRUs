@@ -2,6 +2,7 @@
 using BankRUs.Application.UseCases.Deposit;
 using BankRUs.Application.UseCases.OpenBankAccount;
 using BankRUs.Application.UseCases.Withdrawal;
+using BankRUs.Application.UseCases.Withdrawal.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -87,7 +88,7 @@ public class BankAccountsController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(new { Message = ex.Message });
+            return BadRequest(new { ex.Message });
         }
     }
 
@@ -105,7 +106,8 @@ public class BankAccountsController : ControllerBase
                 AccountNumber = bankAccountId,
                 Amount = request.Amount,
                 Reference = request.Reference,
-                Currency = "SEK"
+                Currency = "SEK",
+                UserId = Guid.Parse(userId)
             });
 
             var response = new WithdrawalResponseDto
@@ -123,9 +125,36 @@ public class BankAccountsController : ControllerBase
 
             return Created(string.Empty, response);
         }
+        catch (InsufficientFundsException ex)
+        {
+            return Conflict(new { ex.Message });
+        }
         catch (Exception ex)
         {
-            return BadRequest(new { Message = ex.Message });
+            return BadRequest(new { ex.Message });
         }
+    }
+
+    // GET /api/bank-accounts/{bankAccountId}/transactions
+    [HttpGet]
+    [Route("{bankAccountId}/transactions")]
+    public async Task<IActionResult> GetTransactions(Guid bankAccountId, [FromQuery] TransactionQueryParams query)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        var transactions = await _transactionQueryHandler.HandleAsync(
+            new GetTransactionsQuery
+            {
+                BankAccountId = bankAccountId,
+                UserId = userId,
+                Page = query.Page,
+                PageSize = query.PageSize,
+                From = query.From,
+                To = query.To,
+                Type = query.Type,
+                Sort = query.Sort
+            });
+
+        return Ok(transactions);
     }
 }
