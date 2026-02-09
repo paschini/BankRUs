@@ -10,7 +10,7 @@ namespace BankRUs.Application.UseCases.Withdrawal
     public class WithdrawalHandler
     {
         private readonly IBankAccountRepository _bankAccountRepository;
-        private readonly IBankAccountTransactionRepository _bankAccountTransactionRepository
+        private readonly IBankAccountTransactionRepository _bankAccountTransactionRepository;
 
         public WithdrawalHandler(
             IBankAccountRepository bankAccountRepository,
