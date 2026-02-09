@@ -10,5 +10,6 @@ namespace BankRUs.Application.UseCases.Withdrawal
         public decimal Amount { get; set; }
         public string Reference { get; set; } = string.Empty;
         public string? Currency { get; set; } = "SEK";
+        public Guid UserId { get; set; }
     }
 }
