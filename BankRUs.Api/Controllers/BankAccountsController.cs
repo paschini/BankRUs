@@ -144,6 +144,9 @@ public class BankAccountsController : ControllerBase
     // GET /api/bank-accounts/{bankAccountId}/transactions
     [HttpGet]
     [Route("{bankAccountId}/transactions")]
+    [EndpointSummary("Fetches all transaction for a given bank account.")]
+    [EndpointDescription("Gives out all transactions for a given bank account, organized in pages of given size, according to given filters if present.")]
+    [EndpointName("Bank Account Transactions")]
     public async Task<IActionResult> GetTransactions(Guid bankAccountId, [FromQuery] TransactionQueryParamsDto query)
     {
         try

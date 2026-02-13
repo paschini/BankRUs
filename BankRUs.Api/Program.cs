@@ -3,9 +3,9 @@ using BankRUs.Application.Authentication.AuthenticateUser;
 using BankRUs.Application.Identity;
 using BankRUs.Application.Repositories;
 using BankRUs.Application.UseCases.Deposit;
-using BankRUs.Application.UseCases.Withdrawal;
 using BankRUs.Application.UseCases.OpenAccount;
 using BankRUs.Application.UseCases.OpenBankAccount;
+using BankRUs.Application.UseCases.Withdrawal;
 using BankRUs.Infrastructure.Configuration;
 using BankRUs.Intrastructure.Autentication;
 using BankRUs.Intrastructure.Identity;
@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Scalar.AspNetCore;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -116,16 +117,20 @@ builder.Services
   });
 
 builder.Services.AddAuthorization();
-
-
 builder.Services.AddControllers();
+
+builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    using var scope = app.Services.CreateScope();
+    // OpenAPI / Scalar
+    app.MapOpenApi();
+    app.MapScalarApiReference();
 
+    using var scope = app.Services.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
     dbContext.Database.Migrate();
