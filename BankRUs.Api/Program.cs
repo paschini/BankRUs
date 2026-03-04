@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using BankRUs.Application.Authentication;
 using BankRUs.Application.Authentication.AuthenticateUser;
 using BankRUs.Application.Identity;
@@ -14,7 +15,6 @@ using BankRUs.Intrastructure.Repositories;
 using BankRUs.Intrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using System.IdentityModel.Tokens.Jwt;
@@ -24,21 +24,18 @@ using IEmailSender = BankRUs.Application.Services.IEmailSender;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//// Samma instans av CustomerService ska vara tillgänglig
-//// för samtliga klasser inom ett anrop.
-//// Varje request får sin egna instans av CustomerService
-//builder.Services.AddScoped<CustomerService>();
+// Mac SQL Server in Docker - needs password:
+var connectionString = builder.Configuration.GetConnectionString("Default");
+var password = Environment.GetEnvironmentVariable("SQL_SA_PASSWORD");
 
-// Det finns enbart en instans av CustomerService som delas
-// av alla komponenter i applikationen, över applikations livstid.
-
-//// Varje enskild komponent som begär en CustomerService får sin egna
-//// instans av denna.
-//builder.Services.AddTransient<CustomerService>();
+if (!string.IsNullOrWhiteSpace(password))
+{
+    connectionString += $";Password={password};";
+}
 
 // Registrera ApplicationDbContext i DI-containern
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-  options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+  options.UseSqlServer(connectionString));
 
 builder.Services
   .AddIdentity<ApplicationUser, IdentityRole>()
@@ -73,10 +70,10 @@ else
 builder.Services.AddScoped<IBankAccountRepository, BankAccountRepository>();
 builder.Services.AddScoped<IBankAccountTransactionRepository, BankAccountTransactionRepository>();
 
-// 3 typer av livslängder på objekt
-// - singleton = ett och samma objekt delas mellan alla andra under hela applikations livslängd
-// - scoped = varje HTTP-reqeust får sin egen isntans som sen delas av alla objekt inom denna request
-// - transitent = varje objekt får alltid sin egna instans av typen
+// 3 typer av livslÃ¤ngder pÃ¥ objekt
+// - singleton = ett och samma objekt delas mellan alla andra under hela applikations livslÃ¤ngd
+// - scoped = varje HTTP-reqeust fï¿½r sin egen isntans som sen delas av alla objekt inom denna request
+// - transitent = varje objekt fï¿½r alltid sin egna instans av typen
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
 
@@ -124,7 +121,7 @@ builder.Services.AddEndpointsApiExplorer();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == "DevMac")
 {
     // OpenAPI / Scalar
     app.MapOpenApi();

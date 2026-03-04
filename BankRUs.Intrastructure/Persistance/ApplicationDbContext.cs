@@ -38,7 +38,10 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
            
            builder.Property(x => x.Amount)
              .HasPrecision(18, 2);
-
+           
+           builder.Property(x => x.BalanceAfterTransaction)
+             .HasPrecision(18, 2);
+           
            builder
            .HasOne<BankAccount>()
            .WithMany()

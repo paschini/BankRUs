@@ -17,7 +17,7 @@ public class AuthController : ControllerBase
     }
 
     // POST /api/auth/login
-    // usernamn + password
+    // username + password
     [HttpPost("login")]
     public async Task<ActionResult<LoginResponseDto>> Login(LoginRequestDto loginRequest)
     {

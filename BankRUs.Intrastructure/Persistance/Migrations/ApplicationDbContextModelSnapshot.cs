@@ -17,7 +17,7 @@ namespace BankRUs.Intrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.2")
+                .HasAnnotation("ProductVersion", "10.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -56,7 +56,7 @@ namespace BankRUs.Intrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("BankAccounts");
+                    b.ToTable("BankAccounts", (string)null);
                 });
 
             modelBuilder.Entity("BankRUs.Domain.Entities.BankAccountTransaction", b =>
@@ -95,7 +95,7 @@ namespace BankRUs.Intrastructure.Migrations
 
                     b.HasIndex("BankAccountId");
 
-                    b.ToTable("BankAccountTransactions");
+                    b.ToTable("BankAccountTransactions", (string)null);
                 });
 
             modelBuilder.Entity("BankRUs.Intrastructure.Identity.ApplicationUser", b =>

@@ -190,7 +190,7 @@ public class BankAccountsController : ControllerBase
             return Ok(response);
         } catch (NotOwnedException ex)
         {
-            return Forbid();
+            return Forbid(ex.Message);
         }
         catch (Exception ex)
         {
