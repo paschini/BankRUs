@@ -31,6 +31,16 @@ Content-Type: application/json
   "password": "Secret#1"
 }
 
+### login prod
+
+POST https://bankrusappservice.azurewebsites.net/api/auth/login
+Content-Type: application/json
+
+{
+"username": "jane@doe.com",
+"password": "Secret#1"
+}
+
 ### H�mta kontouppgifter
 
 GET https://localhost:8000/api/me

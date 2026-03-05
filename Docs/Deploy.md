@@ -75,7 +75,7 @@ az keyvault secret set \
 ### Create a Docker image and push it to Docker Hub
 This will sue the included Dockerfile.
 ```bash
-docker build -t bankrus:latest .
+docker build --platform linux/amd64 -t yourdockerhubusername/bankrus:latest .
 ```
 
 Test the image locally
@@ -153,24 +153,8 @@ az webapp config appsettings list \
     --resource-group $RESOURCE_GROUP
 ```
 
-az webapp config appsettings set \
---name BankRUsAppService \
---resource-group BankRUs \
---settings KEYVAULT_URI="https://BankRUsVault.vault.azure.net/"
+### Diagnose Issue
+```bash
+az webapp log tail --name $APP_SERVICE_NAME --resource-group $RESOURCE_GROUP
+```
 
-az webapp config appsettings set \
---name BankRUsAppService \
---resource-group BankRUs \
---settings ASPNETCORE_ENVIRONMENT=Production
-
-az webapp config container set \
---name BankRUsAppService \
---resource-group BankRUs \
---docker-custom-image-name paschini/bankrus:latest \
---docker-registry-server-url https://index.docker.io/v1/ \
---docker-registry-server-user paschini \
---docker-registry-server-password ningy0him3
-
-az webapp config appsettings list \
---name BankRUsAppService \
---resource-group BankRUs
