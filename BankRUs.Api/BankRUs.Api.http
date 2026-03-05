@@ -1,6 +1,47 @@
 @BankRUs.Api_HostAddress = https://localhost:8000
 
-GET {{BankRUs.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+### �ppna konto
 
-###
+POST https://localhost:8000/api/accounts
+Content-Type: application/json
+
+{
+  "firstName": "Jane",
+  "lastName": "Doe",
+  "socialSecurityNumber": "19900101-2013",
+  "email": "jane@doe.com"
+}
+
+### Öppna bankkonto
+
+POST https://localhost:8000/api/bank-accounts
+Content-Type: application/json
+
+{
+  "userId": "54a8a630-4dab-4952-a3c2-822356db9c22"
+}
+
+### Logga in / Autentisera
+
+POST https://localhost:8000/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "jane@doe.com",
+  "password": "Secret#1"
+}
+
+### H�mta kontouppgifter
+
+GET https://localhost:8000/api/me
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkMjVkNTJkZi05YWY0LTQxYWQtOTc4Yi05Mzg1YzgyNzUwNWYiLCJlbWFpbCI6ImphbmVAZG9lLmNvbSIsInByZWZlcnJlZF91c2VybmFtZSI6ImphbmVAZG9lLmNvbSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkN1c3RvbWVyIiwiZXhwIjoxNzcyNDY5NDU2LCJpc3MiOiJCYW5rUlVzLkFwaSIsImF1ZCI6IkJhbmtSVXMuQ2xpZW50In0.srzKz8AHmLKhtvT2PeTvl3zVg2xg3TK2j_kUglwoMz4
+
+### Depositera pengar
+POST https://localhost:8000/api/bank-accounts/8913ac65-02c7-477a-9267-3a3b35867f71/deposit
+Content-Type: application/json
+
+{
+  "amount": 500,
+  "reference": "Lön#Januari"
+}
