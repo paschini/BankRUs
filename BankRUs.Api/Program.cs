@@ -1,3 +1,5 @@
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 using Microsoft.EntityFrameworkCore;
 using BankRUs.Application.Authentication;
 using BankRUs.Application.Authentication.AuthenticateUser;
@@ -24,13 +26,27 @@ using IEmailSender = BankRUs.Application.Services.IEmailSender;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Mac SQL Server in Docker - needs password:
 var connectionString = builder.Configuration.GetConnectionString("Default");
-var password = Environment.GetEnvironmentVariable("SQL_SA_PASSWORD");
 
-if (!string.IsNullOrWhiteSpace(password))
+var localPassword = Environment.GetEnvironmentVariable("SQL_SA_PASSWORD");
+var keyVaultUri = Environment.GetEnvironmentVariable("KEYVAULT_URI");
+
+if (!string.IsNullOrWhiteSpace(localPassword))
 {
-    connectionString += $";Password={password};";
+    connectionString += $";Password={localPassword};";
+}
+else if (!string.IsNullOrWhiteSpace(keyVaultUri) && builder.Environment.IsProduction())
+{
+    var secretClient = new SecretClient(new Uri(keyVaultUri), new DefaultAzureCredential());
+    KeyVaultSecret secret = await secretClient.GetSecretAsync("BankRUsSqlPassword");
+    connectionString = connectionString?.Replace("{BANKRUS_SQL_PASSWORD}", secret.Value);
+}
+else
+{
+    throw new InvalidOperationException(
+        "No SQL password found! " +
+        "Set SQL_SA_PASSWORD for local dev, or KEYVAULT_URI for Azure."
+    );
 }
 
 // Registrera ApplicationDbContext i DI-containern
